@@ -36,6 +36,7 @@ usage()
 	  "\tconfig\n" \
 	  "\tprereq\n" \
 	  "\tpartition\n" \
+	  "\tcrypt\n" \
 	  "\tusage\n"
 
 }
@@ -105,6 +106,18 @@ parted -s --list
 }
 
 ########################################################################################
+# setup crypt block device
+#
+
+crypt()
+{
+
+cryptsetup luksFormat /dev/${DCN_DISK}2
+cryptsetup luksOpen /dev/${DCN_DISK}2 ${DCN_DISK}2_crypt
+
+}
+
+########################################################################################
 # main part
 #
 
@@ -123,6 +136,10 @@ case "${1}" in
 		;;
 	partition)
 		partition
+		exit 0
+		;;
+	crypt)
+		crypt
 		exit 0
 		;;
 	*)
