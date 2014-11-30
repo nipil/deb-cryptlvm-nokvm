@@ -18,3 +18,30 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ########################################################################################
+
+# load configuration file
+source template.conf
+
+# debug
+echo "$DCN_DISK"
+echo "$DCN_FSTYPE"
+echo "$DCN_VG_NAME"
+echo "$DCN_ROOTFS_SIZE"
+echo "$DCN_SWAP_SIZE"
+for i in ${DCN_PARTITIONS[@]}; do
+	echo $i
+done
+echo "$DCN_BOOTSTRAP_MIRROR"
+echo "$DCN_BOOTSTRAP_ARCH"
+echo "$DCN_BOOTSTRAP_RELEASE"
+echo "$DCN_INSTALL_RECOMMENDS"
+echo "$DCN_INSTALL_ETCKEEPER"
+echo "$DCN_HOST_NAME"
+echo "$DCN_HOST_IFACE"
+echo "$DCN_HOST_IP"
+echo "$DCN_HOST_MASK"
+echo "$DCN_HOST_GW"
+echo "$DCN_SSH_PORT_PREBOOT"
+echo "$DCN_SSH_PORT_BOOTED"
+echo "$DCN_SSH_AUTHKEYS_SRCFILE"
+
