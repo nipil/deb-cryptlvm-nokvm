@@ -35,6 +35,7 @@ usage()
 	echo -ne "Usage: ${0} operation [args]\n" \
 	  "\tconfig\n" \
 	  "\tprereq\n" \
+	  "\tpartition\n" \
 	  "\tusage\n"
 
 }
@@ -72,7 +73,7 @@ echo ")"
 prereq()
 {
 
-PREREQ="fdisk mkfs.ext4 cryptsetup pvcreate vgcreate lvcreate mkswap \
+PREREQ="parted mkfs.ext4 cryptsetup pvcreate vgcreate lvcreate mkswap \
         mkdir mount swapon chmod grep awk debootstrap chroot umount swapoff \
         vgchange"
 
@@ -85,6 +86,21 @@ for i in ${PREREQ}; do
 		echo "found ${i} at ${j}"
 	fi
 done
+
+}
+
+########################################################################################
+# partition physical disk
+#
+
+partition()
+{
+
+parted -s /dev/${DCN_DISK} mklabel msdos
+parted -a optimal -s /dev/${DCN_DISK} mkpart primary 1M $DCN_BOOTFS_SIZE
+parted -a optimal -s /dev/${DCN_DISK} mkpart primary $DCN_BOOTFS_SIZE -- -1s
+parted -s /dev/${DCN_DISK} set 1 boot on
+parted -s --list
 
 }
 
@@ -103,6 +119,10 @@ case "${1}" in
 		;;
 	prereq)
 		prereq
+		exit 0
+		;;
+	partition)
+		partition
 		exit 0
 		;;
 	*)
