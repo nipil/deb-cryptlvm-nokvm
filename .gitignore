@@ -1,1 +1,4 @@
 local.conf
+*.pub
+authorized_keys
+authorized_keys2
