@@ -1,6 +1,8 @@
 #! /bin/bash
-########################################################################################
-# deb-cryptlvm-nokvm : automated install of remotely unlocked encrypted rootfs systems
+###############################################################################
+# deb-cryptlvm-nokvm
+#
+# automated install of remotely unlocked encrypted rootfs systems
 # 
 # Copyright (C) 2014 nipil (nipil@users.noreply.github.com)
 # 
@@ -16,8 +18,8 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-########################################################################################
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+###############################################################################
 
 # load configuration file
 source template.conf
