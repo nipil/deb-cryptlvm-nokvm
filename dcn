@@ -210,9 +210,9 @@ dcn_mount()
 		DCN_LV_NAME=`echo ${i} | awk -F, '{ print $1 }'`
 		DCN_MNTPOINT=`echo ${i} | awk -F, '{ print $4 }'`
 
-		mkdir -p ${DCN_PREFIX}/${DCN_LV_NAME}
+		mkdir -p ${DCN_PREFIX}${DCN_MNTPOINT}
 		mount /dev/mapper/${DCN_VG_NAME}-${DCN_HOST_NAME}_${DCN_LV_NAME} \
-			${DCN_PREFIX}/${DCN_LV_NAME}
+			${DCN_PREFIX}${DCN_MNTPOINT}
 
 	done
 
