@@ -40,6 +40,8 @@ usage()
 		"\tlvm\n" \
 		"\tmkfs\n" \
 		"\tmnt\n" \
+		"\tunmnt\n" \
+		"\tunlvm\n" \
 		"\tusage\n"
 
 }
@@ -187,6 +189,40 @@ mnt()
 }
 
 ###############################################################################
+# unmount filesystems
+#
+
+unmnt()
+{
+	DCN_PREFIX=/target
+
+	swapoff -a
+
+	umount /dev/${DCN_DISK}1
+
+	for i in ${DCN_PARTITIONS[@]}; do
+		DCN_LV_NAME=`echo $i | awk -F, '{ print $1 }'`
+		umount /dev/mapper/$DCN_VG_NAME-$DCN_LV_NAME
+	done
+
+	umount /dev/mapper/$DCN_VG_NAME-rootfs
+}
+
+###############################################################################
+# deconfigure lvm (physical volumes, volume group, and logical volumes)
+#
+
+unlvm()
+{
+
+	vgchange -an $DCN_VG_NAME
+	lvremove $DCN_VG_NAME
+	vgremove $DCN_VG_NAME
+	pvremove /dev/mapper/${DCN_DISK}2_crypt
+
+}
+
+###############################################################################
 # main part
 #
 
@@ -221,6 +257,14 @@ case "${1}" in
 		;;
 	mnt)
 		mnt
+		exit 0
+		;;
+	unmnt)
+		unmnt
+		exit 0
+		;;
+	unlvm)
+		unlvm
 		exit 0
 		;;
 	*)
