@@ -30,7 +30,7 @@ source template.conf
 # show usage
 #
 
-usage()
+dcn_usage()
 {
 	echo -ne "Usage: ${0} operation [args]\n" \
 		"\tconfig\n" \
@@ -50,7 +50,7 @@ usage()
 # dump loaded configuration
 #
 
-config()
+dcn_config()
 {
 
 	DCN="DCN_DISK DCN_FSTYPE DCN_VG_NAME \
@@ -76,7 +76,7 @@ config()
 # verify that the required tools are available
 #
 
-prereq()
+dcn_prereq()
 {
 
 	PREREQ="parted mkfs.ext4 cryptsetup pvcreate vgcreate lvcreate mkswap \
@@ -99,7 +99,7 @@ prereq()
 # partition physical disk
 #
 
-partition()
+dcn_partition()
 {
 
 	parted -s /dev/${DCN_DISK} mklabel msdos
@@ -114,7 +114,7 @@ partition()
 # setup crypt block device
 #
 
-crypt()
+dcn_crypt()
 {
 
 	cryptsetup luksFormat /dev/${DCN_DISK}2
@@ -126,7 +126,7 @@ crypt()
 # setup lvm (physical volumes, volume group, and logical volumes)
 #
 
-lvm()
+dcn_lvm()
 {
 
 	pvcreate /dev/mapper/${DCN_DISK}2_crypt
@@ -149,7 +149,7 @@ lvm()
 # create filesystem on the volumes and paritions
 #
 
-mkfs()
+dcn_mkfs()
 {
 
 	mkfs.ext4 -L boot /dev/${DCN_DISK}1
@@ -167,7 +167,7 @@ mkfs()
 # mount filesystems
 #
 
-mnt()
+dcn_mount()
 {
 	DCN_PREFIX=/target
 
@@ -192,7 +192,7 @@ mnt()
 # unmount filesystems
 #
 
-unmnt()
+dcn_umount()
 {
 	DCN_PREFIX=/target
 
@@ -212,7 +212,7 @@ unmnt()
 # deconfigure lvm (physical volumes, volume group, and logical volumes)
 #
 
-unlvm()
+dcn_unlvm()
 {
 
 	vgchange -an $DCN_VG_NAME
@@ -228,47 +228,47 @@ unlvm()
 
 case "${1}" in
 	usage)
-		usage
+		dcn_usage
 		exit 0
 		;;
 	config)
-		config
+		dcn_config
 		exit 0
 		;;
 	prereq)
-		prereq
+		dcn_prereq
 		exit 0
 		;;
 	partition)
-		partition
+		dcn_partition
 		exit 0
 		;;
 	crypt)
-		crypt
+		dcn_crypt
 		exit 0
 		;;
 	lvm)
-		lvm
+		dcn_lvm
 		exit 0
 		;;
 	mkfs)
-		mkfs
+		dcn_mkfs
 		exit 0
 		;;
-	mnt)
-		mnt
+	mount)
+		dcn_mount
 		exit 0
 		;;
-	unmnt)
-		unmnt
+	umount)
+		dcn_umount
 		exit 0
 		;;
 	unlvm)
-		unlvm
+		dcn_unlvm
 		exit 0
 		;;
 	*)
-		usage
+		dcn_usage
 		exit 0
 		;;
 esac
