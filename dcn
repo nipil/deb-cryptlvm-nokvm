@@ -45,7 +45,6 @@ dcn_usage()
 		"\tlvm_destroy\n" \
 		"\tbootstrap\n" \
 		"\tusage\n"
-
 }
 
 ###############################################################################
@@ -54,7 +53,6 @@ dcn_usage()
 
 dcn_config()
 {
-
 	DCN="DCN_DISK DCN_FSTYPE DCN_VG_NAME \
 		DCN_BOOTFS_SIZE DCN_ROOTFS_SIZE DCN_SWAP_SIZE \
 		DCN_BOOTSTRAP_MIRROR DCN_BOOTSTRAP_ARCH DCN_BOOTSTRAP_RELEASE \
@@ -71,7 +69,6 @@ dcn_config()
 		echo ${i}
 	done
 	echo ")"
-
 }
 
 ###############################################################################
@@ -80,7 +77,6 @@ dcn_config()
 
 dcn_prereq()
 {
-
 	PREREQ="parted mkfs.ext4 cryptsetup pvcreate vgcreate lvcreate mkswap \
 		mkdir mount swapon chmod grep awk debootstrap chroot umount swapoff \
 		vgchange"
@@ -94,7 +90,6 @@ dcn_prereq()
 			echo "found ${i} at ${j}"
 		fi
 	done
-
 }
 
 ###############################################################################
@@ -103,7 +98,6 @@ dcn_prereq()
 
 dcn_partition()
 {
-
 	parted -s /dev/${DCN_DISK} mklabel msdos
 
 	parted -a optimal -s /dev/${DCN_DISK} \
@@ -115,7 +109,6 @@ dcn_partition()
 	parted -s /dev/${DCN_DISK} set 1 boot on
 
 	parted -s --list
-
 }
 
 ###############################################################################
@@ -124,10 +117,8 @@ dcn_partition()
 
 dcn_crypt()
 {
-
 	cryptsetup luksFormat /dev/${DCN_DISK}2
 	cryptsetup luksOpen /dev/${DCN_DISK}2 ${DCN_DISK}2_crypt
-
 }
 
 ###############################################################################
@@ -136,7 +127,6 @@ dcn_crypt()
 
 dcn_lvm_create()
 {
-
 	pvcreate /dev/mapper/${DCN_DISK}2_crypt
 
 	vgcreate ${DCN_VG_NAME} /dev/mapper/${DCN_DISK}2_crypt
@@ -159,7 +149,6 @@ dcn_lvm_create()
 	done
 
 	lvdisplay -C
-
 }
 
 ###############################################################################
@@ -168,7 +157,6 @@ dcn_lvm_create()
 
 dcn_mkfs()
 {
-
 	mkfs.ext4 -L ${DCN_HOST_NAME}_boot \
 		/dev/${DCN_DISK}1
 
@@ -186,7 +174,6 @@ dcn_mkfs()
 			/dev/mapper/${DCN_VG_NAME}-${DCN_HOST_NAME}_${DCN_LV_NAME}
 
 	done
-
 }
 
 ###############################################################################
@@ -215,7 +202,6 @@ dcn_mount()
 			${DCN_PREFIX}${DCN_MNTPOINT}
 
 	done
-
 }
 
 ###############################################################################
@@ -230,7 +216,6 @@ dcn_bootstrap()
 		$DCN_BOOTSTRAP_RELEASE \
 		$DCN_PREFIX \
 		$DCN_BOOTSTRAP_MIRROR
-
 }
 
 ###############################################################################
@@ -243,17 +228,11 @@ dcn_umount()
 
 	swapoff -a
 
-	umount /dev/${DCN_DISK}1
-
-	for i in ${DCN_PARTITIONS[@]}; do
-
-		DCN_LV_NAME=`echo ${i} | awk -F, '{ print $1 }'`
-
-		umount /dev/mapper/${DCN_VG_NAME}-${DCN_HOST_NAME}_${DCN_LV_NAME}
-
+	MOUNTS=`mount | awk '{ print $3 }' | grep $DCN_PREFIX | sort -r`
+	for i in ${MOUNTS}; do
+		echo "Unmounting ${i} ..."
+		umount -v ${i}
 	done
-
-	umount /dev/mapper/${DCN_VG_NAME}-${DCN_HOST_NAME}_rootfs
 }
 
 ###############################################################################
@@ -262,9 +241,7 @@ dcn_umount()
 
 dcn_lvm_deactivate()
 {
-
 	vgchange -an ${DCN_VG_NAME}
-
 }
 
 ###############################################################################
@@ -273,13 +250,11 @@ dcn_lvm_deactivate()
 
 dcn_lvm_destroy()
 {
-
 	dcn_lvm_deactivate
 
 	lvremove ${DCN_VG_NAME}
 	vgremove ${DCN_VG_NAME}
 	pvremove /dev/mapper/${DCN_DISK}2_crypt
-
 }
 
 ###############################################################################
