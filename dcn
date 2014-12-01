@@ -41,7 +41,7 @@ dcn_usage()
 		"\tmkfs\n" \
 		"\tmount\n" \
 		"\tbootstrap\n" \
-		"\ttabsetup\n" \
+		"\tprechroot\n" \
 		"\tumount\n" \
 		"\tlvm_deactivate\n" \
 		"\tlvm_destroy\n" \
@@ -225,13 +225,14 @@ dcn_bootstrap()
 }
 
 ###############################################################################
-# setup fstab and crypttab
+# setup various things in etc before chrooting
 #
 
-dcn_tabsetup()
+dcn_prechroot()
 {
 	DCN_PREFIX=/target
 
+	# /etc/crypttab
 	DCN_UUID=$( cryptsetup luksDump /dev/${DCN_DISK}2 \
 		| grep UUID | awk '{ print $2 }' )
 
@@ -239,6 +240,7 @@ dcn_tabsetup()
 	${DCN_DISK}2_crypt UUID=${DCN_UUID} none luks" ) \
 		| column -t > ${DCN_PREFIX}/etc/crypttab
 
+	# /etc/fstab
 	( echo -e "#device mountpoint fstype options dump fsck\n
 	/dev/mapper/${DCN_VG_NAME}-${DCN_HOST_NAME}_swap \
 		none swap sw 0 0\n
@@ -257,7 +259,37 @@ dcn_tabsetup()
 
 	done ) | column -t > ${DCN_PREFIX}/etc/fstab
 
+	# /etc/fstab
 	ln -sf /proc/mounts ${DCN_PREFIX}/etc/mtab
+
+	# /etc/apt/sources.list
+	( echo "deb ${DCN_BOOTSTRAP_MIRROR} ${DCN_BOOTSTRAP_RELEASE} \
+		main contrib non-free
+	deb ${DCN_BOOTSTRAP_MIRROR} ${DCN_BOOTSTRAP_RELEASE}-updates \
+		main contrib non-free
+	deb http://security.debian.org/ ${DCN_BOOTSTRAP_RELEASE}/updates \
+		main contrib non-free" ) \
+		| column -t > ${DCN_PREFIX}/etc/apt/sources.list
+
+	# apt 'recommends' configuration
+	echo "APT::Install-Recommends \"${DCN_INSTALL_RECOMMENDS}\";" \
+		> ${DCN_PREFIX}/etc/apt/apt.conf.d/02recommends
+
+	# hostname
+	echo ${DCN_HOST_NAME} > ${DCN_PREFIX}/etc/hostname
+
+	# network
+	echo -e "\nauto lo" \
+		"\niface lo inet loopback" \
+		"\n" \
+		"\nauto ${DCN_HOST_IFACE}" \
+		"\niface ${DCN_HOST_IFACE} inet static" \
+		"\n\taddress ${DCN_HOST_IP}" \
+		"\n\tnetmask ${DCN_HOST_MASK}" \
+		"\n\tgateway ${DCN_HOST_GW}" \
+		"\n\tpre-up /sbin/ip addr flush dev ${DCN_HOST_IFACE} || true" \
+		> ${DCN_PREFIX}/etc/network/interfaces
+
 }
 
 ###############################################################################
@@ -340,8 +372,8 @@ case "${1}" in
 		dcn_bootstrap
 		exit 0
 		;;
-	tabsetup)
-		dcn_tabsetup
+	prechroot)
+		dcn_prechroot
 		exit 0
 		;;
 	umount)
