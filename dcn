@@ -175,7 +175,7 @@ mnt()
 	mount /dev/mapper/$DCN_VG_NAME-rootfs $DCN_PREFIX
 
 	mkdir -p $DCN_PREFIX/boot
-	mount /dev/sda1 $DCN_PREFIX/boot
+	mount /dev/${DCN_DISK}1 $DCN_PREFIX/boot
 
 	for i in ${DCN_PARTITIONS[@]}; do
 		DCN_LV_NAME=`echo $i | awk -F, '{ print $1 }'`
