@@ -39,11 +39,11 @@ dcn_usage()
 		"\tcrypt\n" \
 		"\tlvm_create\n" \
 		"\tmkfs\n" \
-		"\tmnt\n" \
-		"\tunmnt\n" \
+		"\tmount\n" \
+		"\tbootstrap\n" \
+		"\tumount\n" \
 		"\tlvm_deactivate\n" \
 		"\tlvm_destroy\n" \
-		"\tbootstrap\n" \
 		"\tusage\n"
 }
 
