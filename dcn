@@ -43,6 +43,7 @@ dcn_usage()
 		"\tunmnt\n" \
 		"\tlvm_deactivate\n" \
 		"\tlvm_destroy\n" \
+		"\tbootstrap\n" \
 		"\tusage\n"
 
 }
@@ -218,6 +219,21 @@ dcn_mount()
 }
 
 ###############################################################################
+# install base debian system
+#
+
+dcn_bootstrap()
+{
+	DCN_PREFIX=/target
+
+	debootstrap --arch=$DCN_BOOTSTRAP_ARCH \
+		$DCN_BOOTSTRAP_RELEASE \
+		$DCN_PREFIX \
+		$DCN_BOOTSTRAP_MIRROR
+
+}
+
+###############################################################################
 # unmount filesystems
 #
 
@@ -301,6 +317,10 @@ case "${1}" in
 		;;
 	mount)
 		dcn_mount
+		exit 0
+		;;
+	bootstrap)
+		dcn_bootstrap
 		exit 0
 		;;
 	umount)
