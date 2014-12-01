@@ -37,11 +37,12 @@ dcn_usage()
 		"\tprereq\n" \
 		"\tpartition\n" \
 		"\tcrypt\n" \
-		"\tlvm\n" \
+		"\tlvm_create\n" \
 		"\tmkfs\n" \
 		"\tmnt\n" \
 		"\tunmnt\n" \
-		"\tunlvm\n" \
+		"\tlvm_deactivate\n" \
+		"\tlvm_destroy\n" \
 		"\tusage\n"
 
 }
@@ -126,7 +127,7 @@ dcn_crypt()
 # setup lvm (physical volumes, volume group, and logical volumes)
 #
 
-dcn_lvm()
+dcn_lvm_create()
 {
 
 	pvcreate /dev/mapper/${DCN_DISK}2_crypt
@@ -209,13 +210,25 @@ dcn_umount()
 }
 
 ###############################################################################
-# deconfigure lvm (physical volumes, volume group, and logical volumes)
+# deactivate lvm (physical volumes, volume group, and logical volumes)
 #
 
-dcn_unlvm()
+dcn_lvm_deactivate()
 {
 
 	vgchange -an $DCN_VG_NAME
+
+}
+
+###############################################################################
+# destroy lvm (physical volumes, volume group, and logical volumes)
+#
+
+dcn_lvm_destroy()
+{
+
+	dcn_lvm_deactivate
+
 	lvremove $DCN_VG_NAME
 	vgremove $DCN_VG_NAME
 	pvremove /dev/mapper/${DCN_DISK}2_crypt
@@ -247,8 +260,8 @@ case "${1}" in
 		dcn_crypt
 		exit 0
 		;;
-	lvm)
-		dcn_lvm
+	lvm_create)
+		dcn_lvm_create
 		exit 0
 		;;
 	mkfs)
@@ -263,8 +276,12 @@ case "${1}" in
 		dcn_umount
 		exit 0
 		;;
-	unlvm)
-		dcn_unlvm
+	lvm_deactivate)
+		dcn_lvm_deactivate
+		exit 0
+		;;
+	lvm_destroy)
+		dcn_lvm_destroy
 		exit 0
 		;;
 	*)
