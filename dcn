@@ -41,6 +41,7 @@ dcn_usage()
 		"\tmkfs\n" \
 		"\tmount\n" \
 		"\tbootstrap\n" \
+		"\ttabsetup\n" \
 		"\tumount\n" \
 		"\tlvm_deactivate\n" \
 		"\tlvm_destroy\n" \
@@ -224,6 +225,39 @@ dcn_bootstrap()
 }
 
 ###############################################################################
+# setup fstab and crypttab
+#
+
+dcn_tabsetup()
+{
+	DCN_PREFIX=/target
+
+	DCN_UUID=$( cryptsetup luksDump /dev/${DCN_DISK}2 \
+		| grep UUID | awk '{ print $2 }' )
+
+	echo "${DCN_DISK}2_crypt UUID=${DCN_UUID} none luks" \
+		> ${DCN_PREFIX}/etc/crypttab
+
+	( echo -e "#device mountpoint fstype options dump fsck\n
+		/dev/mapper/${DCN_VG_NAME}-${DCN_HOST_NAME}_swap \
+			none swap sw 0 0\n
+		/dev/mapper/${DCN_VG_NAME}-${DCN_HOST_NAME}_rootfs / \
+			${DCN_FSTYPE} defaults,noatime,errors=remount-ro 0 1\n
+		/dev/${DCN_DISK}1 /boot ${DCN_FSTYPE} \
+			defaults,noatime,nodev,nosuid,noexec 0 2"
+
+	for i in ${DCN_PARTITIONS[@]}; do
+
+		DCN_LV_NAME=$( echo ${i} | awk -F, '{ print $1 }' )
+		DCN_MNTPOINT=$( echo ${i} | awk -F, '{ print $4 }' )
+
+		echo "/dev/mapper/${DCN_VG_NAME}-${DCN_HOST_NAME}_${DCN_LV_NAME} \
+			${DCN_MNTPOINT} ${DCN_FSTYPE} defaults,noatime 0 2"
+
+	done ) | column -t > ${DCN_PREFIX}/etc/fstab
+}
+
+###############################################################################
 # unmount filesystems
 #
 
@@ -301,6 +335,10 @@ case "${1}" in
 		;;
 	bootstrap)
 		dcn_bootstrap
+		exit 0
+		;;
+	tabsetup)
+		dcn_tabsetup
 		exit 0
 		;;
 	umount)
