@@ -322,6 +322,10 @@ dcn_prechroot()
 
 dcn_chrootops()
 {
+	mount -o bind /dev /target/dev
+	mount -t proc proc /target/proc
+	mount -t sysfs sys /target/sys
+
 	XTERM=xterm-color LANG=C.UTF-8 chroot ${DCN_PREFIX} \
 		apt-get update
 
