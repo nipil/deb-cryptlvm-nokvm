@@ -33,6 +33,10 @@ source template.conf
 dcn_usage()
 {
 	echo -ne "Usage: ${0} operation [args]\n" \
+		"All in one batch operation\n" \
+		"\tmakeall\n" \
+		"Step by step operations\n" \
+		"\tconfig\n" \
 		"\tconfig\n" \
 		"\tprereq\n" \
 		"\tpartition\n" \
@@ -42,6 +46,7 @@ dcn_usage()
 		"\tmount\n" \
 		"\tbootstrap\n" \
 		"\tprechroot\n" \
+		"Utility operations\n" \
 		"\tumount\n" \
 		"\tlvm_deactivate\n" \
 		"\tlvm_destroy\n" \
@@ -332,6 +337,23 @@ dcn_lvm_destroy()
 }
 
 ###############################################################################
+# do all operation in the right order
+#
+
+dcn_makeall()
+{
+	dcn_config
+	dcn_prereq
+	dcn_partition
+	dcn_crypt
+	dcn_lvm_create
+	dcn_mkfs
+	dcn_mount
+	dcn_bootstrap
+	dcn_prechroot
+}
+
+###############################################################################
 # main part
 #
 
@@ -386,6 +408,10 @@ case "${1}" in
 		;;
 	lvm_destroy)
 		dcn_lvm_destroy
+		exit 0
+		;;
+	makeall)
+		dcn_makeall
 		exit 0
 		;;
 	*)
