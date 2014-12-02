@@ -51,6 +51,7 @@ dcn_usage()
 		"\tumount\n" \
 		"\tlvm_deactivate\n" \
 		"\tlvm_destroy\n" \
+		"\tcryptoff\n" \
 		"\tusage\n"
 }
 
@@ -393,6 +394,15 @@ dcn_lvm_destroy()
 }
 
 ###############################################################################
+# close luks volume
+#
+
+dcn_cryptoff()
+{
+	cryptsetup luksClose ${DCN_DISK}2_crypt
+}
+
+###############################################################################
 # do all operation in the right order
 #
 
@@ -471,6 +481,10 @@ case "${1}" in
 		;;
 	lvm_destroy)
 		dcn_lvm_destroy
+		exit 0
+		;;
+	cryptoff)
+		dcn_cryptoff
 		exit 0
 		;;
 	makeall)
