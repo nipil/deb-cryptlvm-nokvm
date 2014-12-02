@@ -302,7 +302,7 @@ dcn_umount()
 
 	swapoff -a
 
-	MOUNTS= $( mount | awk '{ print $3 }' | grep ${DCN_PREFIX} | sort -r )
+	MOUNTS=$( mount | awk '{ print $3 }' | grep ${DCN_PREFIX} | sort -r )
 	for i in ${MOUNTS}; do
 		echo "Unmounting ${i} ..."
 		umount -v ${i}
