@@ -314,6 +314,9 @@ dcn_prechroot()
 	cp ${DCN_SSH_AUTHKEYS_SRCFILE} \
 		${DCN_PREFIX}/root/.ssh/authorized_keys
 
+	# install initramfs hook to generate unlocking script
+	mkdir -p ${DCN_PREFIX}/usr/share/initramfs-tools/hooks
+	cp unlock ${DCN_PREFIX}/usr/share/initramfs-tools/hooks
 }
 
 ###############################################################################

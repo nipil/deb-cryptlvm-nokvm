@@ -1,0 +1,48 @@
+#!/bin/sh -e
+
+PREREQS=""
+
+prereqs() { echo "$PREREQS"; }
+
+case "$1" in
+	prereqs)
+		prereqs
+		exit 0
+		;;
+esac
+
+## hook-functions provides copy_exec()
+. /usr/share/initramfs-tools/hook-functions
+
+cat << 'EOF' > $DESTDIR/bin/unlock
+#!/bin/sh -e
+
+# input key
+
+echo 'Enter passkey to unlock cryptroot, followed by Ctrl-D Ctrl-D:'
+stty -echo
+cat > /lib/cryptsetup/passfifo
+stty echo
+
+# wait and check if device is available
+
+for i in `seq 1 30`
+do
+  for f in /dev/mapper/*_crypt; do
+    if [ -e "$f" ]; then
+      echo "cryptroot unlocked, please type 'exit'"
+      exit 0
+    else
+      echo -n "."
+    fi
+     break
+   done
+   sleep 0.1
+done
+
+echo "cryptroot not found, maybe wrong key ?"
+
+EOF
+
+chmod a+x $DESTDIR/bin/unlock
+
