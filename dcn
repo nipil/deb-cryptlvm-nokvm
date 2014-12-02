@@ -333,6 +333,26 @@ dcn_chrootops()
 		apt-get install makedev cryptsetup lvm2 ssh dropbear busybox \
 		initramfs-tools locales grub-pc kbd console-setup \
 		linux-image-${DCN_BOOTSTRAP_ARCH} -y
+
+	if [[ "${DCN_SSH_PORT_PREBOOT}" != "22" ]]; then
+		# add command line parameter to initramfs dropbear invocation
+		DCN_DBP="/sbin/dropbear"
+		DCN_INITFS=${DCN_PREFIX}/usr/share/initramfs-tools/scripts
+		DCN_SED="s,^(${DCN_DBP}).*$,\1 -p ${DCN_SSH_PORT_PREBOOT},"
+		sed -i -r -e "${DCN_SED}" ${DCN_INITFS}/init-premount/dropbear
+		# regenerate initramfs to include the change
+		XTERM=xterm-color LANG=C.UTF-8 chroot ${DCN_PREFIX} \
+			update-initramfs -u
+	fi
+
+	# force grub to use text console and no splash/quiet option (for QEmu)
+	sed -i -r -e 's/#?(GRUB_TERMINAL)=.*$/\1=console/' \
+		-e 's/(GRUB_CMDLINE_LINUX[^=]*)=.*$/\1=""/' \
+		${DCN_PREFIX}/etc/default/grub
+
+	# regenerate grub boot config to include the change
+	XTERM=xterm-color LANG=C.UTF-8 chroot ${DCN_PREFIX} \
+		update-grub
 }
 
 ###############################################################################
