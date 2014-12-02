@@ -46,6 +46,7 @@ dcn_usage()
 		"\tmount\n" \
 		"\tbootstrap\n" \
 		"\tprechroot\n" \
+		"\tchrootops\n" \
 		"Utility operations\n" \
 		"\tumount\n" \
 		"\tlvm_deactivate\n" \
@@ -188,8 +189,6 @@ dcn_mkfs()
 
 dcn_mount()
 {
-	DCN_PREFIX=/target
-
 	swapon /dev/mapper/${DCN_VG_NAME}-${DCN_HOST_NAME}_swap
 
 	mkdir -p ${DCN_PREFIX}
@@ -221,8 +220,6 @@ dcn_mount()
 
 dcn_bootstrap()
 {
-	DCN_PREFIX=/target
-
 	debootstrap --arch=${DCN_BOOTSTRAP_ARCH} \
 		${DCN_BOOTSTRAP_RELEASE} \
 		${DCN_PREFIX} \
@@ -235,8 +232,6 @@ dcn_bootstrap()
 
 dcn_prechroot()
 {
-	DCN_PREFIX=/target
-
 	# /etc/crypttab
 	DCN_UUID=$( cryptsetup luksDump /dev/${DCN_DISK}2 \
 		| grep UUID | awk '{ print $2 }' )
@@ -321,13 +316,31 @@ dcn_prechroot()
 }
 
 ###############################################################################
+# do operations in the target chrooted environment
+#
+
+dcn_chrootops()
+{
+	XTERM=xterm-color LANG=C.UTF-8 chroot ${DCN_PREFIX} \
+		apt-get update
+
+	if [[ "${DCN_INSTALL_ETCKEEPER,,}" = "true" ]]; then
+		XTERM=xterm-color LANG=C.UTF-8 chroot ${DCN_PREFIX} \
+			apt-get install etckeeper -y
+	fi
+
+	XTERM=xterm-color LANG=C.UTF-8 chroot ${DCN_PREFIX} \
+		apt-get install makedev cryptsetup lvm2 ssh dropbear busybox \
+		initramfs-tools locales grub-pc kbd console-setup \
+		linux-image-${DCN_BOOTSTRAP_ARCH} -y
+}
+
+###############################################################################
 # unmount filesystems
 #
 
 dcn_umount()
 {
-	DCN_PREFIX=/target
-
 	swapoff -a
 
 	MOUNTS=$( mount | awk '{ print $3 }' | grep ${DCN_PREFIX} | sort -r )
@@ -374,11 +387,14 @@ dcn_makeall()
 	dcn_mount
 	dcn_bootstrap
 	dcn_prechroot
+	dcn_chrootops
 }
 
 ###############################################################################
 # main part
 #
+
+export DCN_PREFIX=/target
 
 case "${1}" in
 	usage)
@@ -419,6 +435,10 @@ case "${1}" in
 		;;
 	prechroot)
 		dcn_prechroot
+		exit 0
+		;;
+	chrootops)
+		dcn_chrootops
 		exit 0
 		;;
 	umount)
