@@ -85,7 +85,7 @@ dcn_prereq()
 {
 	PREREQ="parted mkfs.ext4 cryptsetup pvcreate vgcreate lvcreate mkswap \
 		mkdir mount swapon chmod grep awk debootstrap chroot umount swapoff \
-		vgchange"
+		vgchange printf"
 
 	for i in ${PREREQ}; do
 		j=$( which ${i} )
@@ -283,7 +283,7 @@ dcn_prechroot()
 	# hostname
 	echo ${DCN_HOST_NAME} > ${DCN_PREFIX}/etc/hostname
 
-	# network
+	# post-unlock network configuration
 	echo -e "\nauto lo" \
 		"\niface lo inet loopback" \
 		"\n" \
@@ -294,6 +294,29 @@ dcn_prechroot()
 		"\n\tgateway ${DCN_HOST_GW}" \
 		"\n\tpre-up /sbin/ip addr flush dev ${DCN_HOST_IFACE} || true" \
 		> ${DCN_PREFIX}/etc/network/interfaces
+
+	# pre-unlock network configuration
+	# https://www.kernel.org/doc/Documentation/filesystems/nfs/nfsroot.txt
+	mkdir -p ${DCN_PREFIX}/etc/initramfs-tools/conf.d/
+	printf "export IP=%s::%s:%s:%s:%s:off\n" \
+		"${DCN_HOST_IP}" \
+		"${DCN_HOST_GW}" \
+		"${DCN_HOST_MASK}" \
+		"${DCN_HOST_NAME}" \
+		"${DCN_HOST_IFACE}" \
+		> ${DCN_PREFIX}/etc/initramfs-tools/conf.d/network_config
+
+	# pre-unlock (dropbear) ssh public keys
+	mkdir -p ${DCN_PREFIX}/etc/initramfs-tools/root/.ssh/
+	chmod 700 ${DCN_PREFIX}/etc/initramfs-tools/root/.ssh/
+	cp ${DCN_SSH_AUTHKEYS_SRCFILE} \
+		${DCN_PREFIX}/etc/initramfs-tools/root/.ssh/authorized_keys
+
+	# post-unlock (openssh) ssh public keys
+	mkdir -p ${DCN_PREFIX}/root/.ssh/
+	chmod 700 ${DCN_PREFIX}/root/.ssh/
+	cp ${DCN_SSH_AUTHKEYS_SRCFILE} \
+		${DCN_PREFIX}/root/.ssh/authorized_keys
 
 }
 
