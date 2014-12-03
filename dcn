@@ -37,7 +37,6 @@ dcn_usage()
 		"\tmakeall\n" \
 		"Step by step operations\n" \
 		"\tconfig\n" \
-		"\tconfig\n" \
 		"\tprereq\n" \
 		"\tpartition\n" \
 		"\tcrypt\n" \
