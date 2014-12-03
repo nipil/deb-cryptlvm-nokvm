@@ -88,15 +88,21 @@ Once you're connected to the dropbear ssh daemon, you'll be presented with
 a `~ #` prompt. Simply type `unlock` and press enter, then follow the onscreen
 instructions.
 
+Here is an example. First i tried to unlock, but entered the wrong passphrase.
+Then i tried again, and entered the passphrase correctly.
+
     BusyBox v1.20.2 (Debian 1:1.20.0-7) built-in shell (ash)
     Enter 'help' for a list of built-in commands.
     
     ~ # unlock
     Enter passkey to unlock cryptroot, followed by Ctrl-D Ctrl-D:
+    ..............................cryptroot not found, maybe wrong key ?
+    ~ # unlock
+    Enter passkey to unlock cryptroot, followed by Ctrl-D Ctrl-D:
     .......cryptroot unlocked, please type 'exit'
     ~ # exit
 
-Please note the importance of the inscructions above
+Please note the importance of the instructions displayed right above ! Why ?
 
 You must enter your passphrase, **without hitting enter at the end**, but
 entering *Ctrl-D* twice. That means pressing and holding the "control" key
