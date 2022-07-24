@@ -1,3 +1,7 @@
+# OBSOLETE
+
+This repository has been archived and will not be updated anymore.
+
 # What is it good for ?
 
 Let's say you have a server you want to run debian on. Let's say you
